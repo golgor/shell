@@ -167,3 +167,21 @@ The detection mechanism works via:
 - [ ] Decide on approach (fix selection, aggregate, or Hyprland config)
 - [ ] Implement fix
 - [ ] Test with physical keyboard capslock toggle
+
+---
+
+## 9. Kubernetes context/namespace indicator
+**Effort**: TBD
+
+Add a widget or status indicator that shows the current `kubectx` (Kubernetes context) and `kubens` (Kubernetes namespace). This is critical for avoiding accidental operations against the wrong cluster/namespace.
+
+- [ ] Design and implement (run grill-me-with-docs to refine)
+
+---
+
+## 10. Cloud SQL Proxy status indicator
+**Effort**: TBD
+
+Add a widget or status indicator that tracks whether `cloud-sql-proxy` is running and which instances it's connected to.
+
+- [ ] Design and implement (run grill-me-with-docs to refine)

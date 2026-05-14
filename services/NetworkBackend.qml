@@ -36,14 +36,35 @@ Singleton {
         }
     }
 
+    // Returned to callbacks when no backend is available, so callers never hang.
+    function noBackendError(): var {
+        return {
+            success: false,
+            output: "",
+            error: "No network backend available",
+            exitCode: -1,
+            needsPassword: false
+        };
+    }
+
+    // ── Write operations ──────────────────────────────────────────────────
+
     function connectToNetworkWithPasswordCheck(ssid: string, isSecure: bool, callback: var, bssid: string): void {
-        if (backend)
-            backend.connectToNetworkWithPasswordCheck(ssid, isSecure, callback, bssid);
+        if (!backend) {
+            if (callback)
+                callback(noBackendError());
+            return;
+        }
+        backend.connectToNetworkWithPasswordCheck(ssid, isSecure, callback, bssid);
     }
 
     function connectToNetwork(ssid: string, password: string, bssid: string, callback: var): void {
-        if (backend)
-            backend.connectToNetwork(ssid, password, bssid, callback);
+        if (!backend) {
+            if (callback)
+                callback(noBackendError());
+            return;
+        }
+        backend.connectToNetwork(ssid, password, bssid, callback);
     }
 
     function disconnectFromNetwork(): void {
@@ -52,18 +73,30 @@ Singleton {
     }
 
     function forgetNetwork(ssid: string, callback: var): void {
-        if (backend)
-            backend.forgetNetwork(ssid, callback);
+        if (!backend) {
+            if (callback)
+                callback(noBackendError());
+            return;
+        }
+        backend.forgetNetwork(ssid, callback);
     }
 
     function enableWifi(enabled: bool, callback: var): void {
-        if (backend)
-            backend.enableWifi(enabled, callback);
+        if (!backend) {
+            if (callback)
+                callback(noBackendError());
+            return;
+        }
+        backend.enableWifi(enabled, callback);
     }
 
     function toggleWifi(callback: var): void {
-        if (backend)
-            backend.toggleWifi(callback);
+        if (!backend) {
+            if (callback)
+                callback(noBackendError());
+            return;
+        }
+        backend.toggleWifi(callback);
     }
 
     function rescanWifi(): void {
@@ -71,14 +104,42 @@ Singleton {
             backend.rescanWifi();
     }
 
+    function connectEthernet(connectionName: string, interfaceName: string, callback: var): void {
+        if (!backend) {
+            if (callback)
+                callback(noBackendError());
+            return;
+        }
+        backend.connectEthernet(connectionName, interfaceName, callback);
+    }
+
+    function disconnectEthernet(connectionName: string, callback: var): void {
+        if (!backend) {
+            if (callback)
+                callback(noBackendError());
+            return;
+        }
+        backend.disconnectEthernet(connectionName, callback);
+    }
+
+    // ── Read operations ───────────────────────────────────────────────────
+
     function getNetworks(callback: var): void {
-        if (backend)
-            backend.getNetworks(callback);
+        if (!backend) {
+            if (callback)
+                callback([]);
+            return;
+        }
+        backend.getNetworks(callback);
     }
 
     function getWifiStatus(callback: var): void {
-        if (backend)
-            backend.getWifiStatus(callback);
+        if (!backend) {
+            if (callback)
+                callback(false);
+            return;
+        }
+        backend.getWifiStatus(callback);
     }
 
     function hasSavedProfile(ssid: string): bool {
@@ -86,33 +147,39 @@ Singleton {
     }
 
     function loadSavedConnections(callback: var): void {
-        if (backend)
-            backend.loadSavedConnections(callback);
+        if (!backend) {
+            if (callback)
+                callback([]);
+            return;
+        }
+        backend.loadSavedConnections(callback);
     }
 
     function getEthernetInterfaces(callback: var): void {
-        if (backend)
-            backend.getEthernetInterfaces(callback);
-    }
-
-    function connectEthernet(connectionName: string, interfaceName: string, callback: var): void {
-        if (backend)
-            backend.connectEthernet(connectionName, interfaceName, callback);
-    }
-
-    function disconnectEthernet(connectionName: string, callback: var): void {
-        if (backend)
-            backend.disconnectEthernet(connectionName, callback);
+        if (!backend) {
+            if (callback)
+                callback([]);
+            return;
+        }
+        backend.getEthernetInterfaces(callback);
     }
 
     function getWirelessDeviceDetails(interfaceName: string, callback: var): void {
-        if (backend)
-            backend.getWirelessDeviceDetails(interfaceName, callback);
+        if (!backend) {
+            if (callback)
+                callback(null);
+            return;
+        }
+        backend.getWirelessDeviceDetails(interfaceName, callback);
     }
 
     function getEthernetDeviceDetails(interfaceName: string, callback: var): void {
-        if (backend)
-            backend.getEthernetDeviceDetails(interfaceName, callback);
+        if (!backend) {
+            if (callback)
+                callback(null);
+            return;
+        }
+        backend.getEthernetDeviceDetails(interfaceName, callback);
     }
 
     onBackendChanged: {

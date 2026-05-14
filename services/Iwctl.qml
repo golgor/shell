@@ -460,6 +460,16 @@ Singleton {
     }
 
     function enableWifi(enabled: bool, callback: var): void {
+        if (!root.available) {
+            if (callback)
+                callback({
+                    success: false,
+                    output: "",
+                    error: "iwctl not available",
+                    exitCode: -1
+                });
+            return;
+        }
         ensureWirelessInterface(iface => {
             if (!iface || iface.length === 0) {
                 dbg("enableWifi: no interface");
@@ -495,7 +505,7 @@ Singleton {
     }
 
     function rescanWifi(): void {
-        if (root.scanning)
+        if (!root.available || root.scanning)
             return;
 
         root.scanning = true;
@@ -533,6 +543,17 @@ Singleton {
     }
 
     function connectToNetwork(ssid: string, password: string, bssid: string, callback: var): void {
+        if (!root.available) {
+            if (callback)
+                callback({
+                    success: false,
+                    output: "",
+                    error: "iwctl not available",
+                    exitCode: -1,
+                    needsPassword: false
+                });
+            return;
+        }
         ensureWirelessInterface(iface => {
             if (!iface || iface.length === 0) {
                 if (callback) {
@@ -597,6 +618,8 @@ Singleton {
     }
 
     function disconnectFromNetwork(): void {
+        if (!root.available)
+            return;
         ensureWirelessInterface(iface => {
             if (!iface || iface.length === 0)
                 return;
@@ -611,6 +634,16 @@ Singleton {
     }
 
     function forgetNetwork(ssid: string, callback: var): void {
+        if (!root.available) {
+            if (callback)
+                callback({
+                    success: false,
+                    output: "",
+                    error: "iwctl not available",
+                    exitCode: -1
+                });
+            return;
+        }
         if (!ssid || ssid.length === 0) {
             if (callback) {
                 callback({
@@ -691,6 +724,16 @@ Singleton {
     }
 
     function connectEthernet(connectionName: string, interfaceName: string, callback: var): void {
+        if (!root.available) {
+            if (callback)
+                callback({
+                    success: false,
+                    output: "",
+                    error: "iwctl not available",
+                    exitCode: -1
+                });
+            return;
+        }
         const iface = (interfaceName && interfaceName.length > 0) ? interfaceName : connectionName;
         if (!iface || iface.length === 0) {
             if (callback) {
@@ -716,6 +759,16 @@ Singleton {
     }
 
     function disconnectEthernet(connectionName: string, callback: var): void {
+        if (!root.available) {
+            if (callback)
+                callback({
+                    success: false,
+                    output: "",
+                    error: "iwctl not available",
+                    exitCode: -1
+                });
+            return;
+        }
         const iface = (connectionName && connectionName.length > 0) ? connectionName : (root.activeEthernet ? root.activeEthernet.interface : "");
 
         if (!iface || iface.length === 0) {

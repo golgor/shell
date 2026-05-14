@@ -196,6 +196,7 @@ Singleton {
             bssid: "",
             frequency: 0,
             security: "",
+            ipv4Address: "",
             rssiDbm: -100
         };
 
@@ -226,6 +227,11 @@ Singleton {
                 info.frequency = parseInt(value, 10) || 0;
             } else if (key === "Security") {
                 info.security = value;
+            } else if (key === "IPv4 address") {
+                // Extract bare IPv4, ignoring any trailing info (e.g. CIDR, scope)
+                const ip4 = value.match(/^(\d+\.\d+\.\d+\.\d+)/);
+                if (ip4)
+                    info.ipv4Address = ip4[1];
             } else if (key === "RSSI") {
                 const rm = value.match(/(-?\d+)/);
                 if (rm)
@@ -349,6 +355,8 @@ Singleton {
                                     n.frequency = station.frequency || n.frequency;
                                     if (station.security && station.security.length > 0)
                                         n.security = station.security;
+                                    if (station.ipv4Address && station.ipv4Address.length > 0)
+                                        n.ipv4Address = station.ipv4Address;
                                 } else {
                                     n.active = false;
                                 }
@@ -362,7 +370,8 @@ Singleton {
                                     frequency: station.frequency || 0,
                                     ssid: station.ssid,
                                     bssid: station.bssid || "",
-                                    security: station.security || ""
+                                    security: station.security || "",
+                                    ipv4Address: station.ipv4Address || ""
                                 });
                             }
                         }
@@ -988,6 +997,7 @@ Singleton {
         readonly property int frequency: lastIpcObject.frequency
         readonly property bool active: lastIpcObject.active
         readonly property string security: lastIpcObject.security
+        readonly property string ipv4Address: lastIpcObject.ipv4Address ?? ""
         readonly property bool isSecure: security.length > 0
     }
 }

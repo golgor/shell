@@ -64,13 +64,22 @@ ColumnLayout {
             }
 
             StyledText {
+                visible: NetworkBackend.wifiEnabled && NetworkBackend.active !== null && (NetworkBackend.active.ipv4Address.length > 0)
+                Layout.preferredHeight: visible ? implicitHeight : 0
+                text: NetworkBackend.active ? NetworkBackend.active.ipv4Address : ""
+                color: Colours.palette.m3onSurfaceVariant
+                font.pointSize: Tokens.font.size.small
+            }
+
+            StyledText {
                 visible: NetworkBackend.wifiEnabled && NetworkBackend.active !== null
                 Layout.preferredHeight: visible ? implicitHeight : 0
                 text: {
                     if (!NetworkBackend.active)
                         return "";
-                    const security = NetworkBackend.active.isSecure ? qsTr("Secured") : qsTr("Open");
-                    return qsTr("%1% · %2").arg(NetworkBackend.active.strength).arg(security);
+                    const sec = NetworkBackend.active.security;
+                    const secLabel = sec.length > 0 ? sec : qsTr("Open");
+                    return qsTr("%1% · %2").arg(NetworkBackend.active.strength).arg(secLabel);
                 }
                 color: Colours.palette.m3onSurfaceVariant
                 font.pointSize: Tokens.font.size.small

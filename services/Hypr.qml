@@ -25,8 +25,8 @@ Singleton {
     readonly property int activeWsId: focusedWorkspace?.id ?? 1
 
     readonly property HyprKeyboard keyboard: extras.devices.keyboards.find(kb => kb.main) ?? null
-    readonly property bool capsLock: keyboard?.capsLock ?? false
-    readonly property bool numLock: keyboard?.numLock ?? false
+    readonly property bool capsLock: extras.devices.keyboards.some(kb => kb.capsLock)
+    readonly property bool numLock: extras.devices.keyboards.some(kb => kb.numLock)
     readonly property string defaultKbLayout: keyboard?.layout.split(",")[0] ?? "??"
     readonly property string kbLayoutFull: keyboard?.activeKeymap ?? "Unknown"
     readonly property string kbLayout: kbMap.get(kbLayoutFull) ?? "??"

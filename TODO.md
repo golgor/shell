@@ -53,12 +53,22 @@ Omarchy theme change → theme-set hook → ThemeGenerator.sh
 **Effort**: Medium
 
 ~~24h clock~~ ✅ Fixed via `shell.json` config.
+~~Design~~ ✅ Grilled — see `docs/adr/0001-dashboard-trigger-tab.md`
 
 ### Top-edge trigger tab
-Currently the dashboard is invisible until triggered by hover at the top edge, drag, or keyboard shortcut. Adding a visible tab/handle at the top center showing date/time would provide a persistent affordance and orientation info.
+Persistent pill at top-center showing `Wednesday 14 May 2026 · W20  |  14:32`. Weight contrast typography (time semibold, date regular). Slides up when dashboard opens (tied to `dashboard.offsetScale`). Own `PanelBg` blob. Floats above windows.
+
+Replaces the bar clock as sole time display.
 
 - [x] Verify 24h format — fixed via config
-- [ ] Design and implement (run grill-me-with-docs to refine)
+- [x] Design — ADR 0001
+- [ ] Add `isoWeekNumber()` Q_INVOKABLE to `CUtils` (C++ — needs rebuild)
+- [ ] Create `modules/dashboard/TriggerTab.qml`
+- [ ] Add TriggerTab to `modules/drawers/Panels.qml`
+- [ ] Add `PanelBg` blob to `modules/drawers/ContentWindow.qml`
+- [ ] Add Subtract region to `modules/drawers/Regions.qml`
+- [ ] Remove `"clock"` from bar entries in `shell.json`
+- [ ] Test: tab visible, slides up on dashboard open, hides in fullscreen
 
 ---
 

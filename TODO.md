@@ -58,11 +58,7 @@ Omarchy theme change → theme-set hook → ThemeGenerator.sh
   → Colours.qml FileView auto-reloads
 ```
 
-- [ ] Create `scripts/omarchy-theme-sync.sh` that reads `colors.toml` and writes `scheme.json`
-- [ ] Solve M3 palette generation (either npm `material-color-utilities`, Python lib, or heuristic mapping)
-- [ ] Update `~/.config/omarchy/hooks/theme-set` to call the new script
-- [ ] Create `~/.local/state/caelestia/` directory and generate initial `scheme.json`
-- [ ] Test theme switching with `omarchy theme set <name>`
+- [ ] Design and implement (run grill-me-with-docs to refine)
 
 ---
 
@@ -75,11 +71,7 @@ Omarchy theme change → theme-set hook → ThemeGenerator.sh
 Currently the dashboard is invisible until triggered by hover at the top edge, drag, or keyboard shortcut. Adding a visible tab/handle at the top center showing date/time would provide a persistent affordance and orientation info.
 
 - [x] Verify 24h format — fixed via config
-- [ ] Create `DashboardTab.qml` — small visible handle at top-center showing date/time
-- [ ] Modify `modules/dashboard/Wrapper.qml` — render tab outside the `offsetScale`-gated visibility
-- [ ] Update `modules/drawers/Regions.qml` — ensure tab is in the Wayland input region
-- [ ] Add click-to-toggle interaction on the tab
-- [ ] Add `Config.dashboard.showTriggerTab` config property in `plugin/src/Caelestia/Config/dashboardconfig.hpp`
+- [ ] Design and implement (run grill-me-with-docs to refine)
 
 ---
 
@@ -108,10 +100,7 @@ The custom picker is used in one place: the dashboard face/profile picture picke
 2. **D-Bus portal call** — Call `org.freedesktop.portal.FileChooser.OpenFile()` directly. More work but pure QML/JS.
 3. **Shell out** — `zenity --file-selection` or similar. Hacky but quick.
 
-- [ ] Decide on approach
-- [ ] Implement portal-based file picker
-- [ ] Replace `components/filedialog/` usage in `User.qml` (and any other consumers)
-- [ ] Consider keeping custom picker as fallback if portal is unavailable
+- [ ] Design and implement (run grill-me-with-docs to refine)
 
 ---
 
@@ -136,11 +125,7 @@ This is feasible using the existing `ScreencopyView` component which accepts `Hy
 - `modules/bar/popouts/Content.qml` — popout registry (add new popout here)
 - `modules/bar/popouts/PopoutState.qml` — popout state machine
 
-- [ ] Create `modules/bar/popouts/WorkspacePreview.qml` with grid of ScreencopyView thumbnails
-- [ ] Register it in `modules/bar/popouts/Content.qml` as a Popout
-- [ ] Wire workspace hover in `modules/bar/components/workspaces/Workspace.qml` to trigger the popout
-- [ ] Add performance safeguards (thumbnail limit, lazy loading, live vs static capture)
-- [ ] Consider disabling or making the active window popout configurable
+- [ ] Design and implement (run grill-me-with-docs to refine)
 
 ---
 

@@ -20,6 +20,7 @@ Item {
     required property DrawerVisibilities visibilities
     required property Bar.BarWrapper bar
     required property real borderThickness
+    required property bool fullscreen
 
     readonly property alias osd: osd
     readonly property alias osdWrapper: osdWrapper
@@ -28,6 +29,7 @@ Item {
     readonly property alias sessionWrapper: sessionWrapper
     readonly property alias launcher: launcher
     readonly property alias dashboard: dashboard
+    readonly property alias triggerTab: triggerTab
     readonly property alias popouts: popoutsWrapper.content
     readonly property alias popoutsWrapper: popoutsWrapper
     readonly property alias utilities: utilities
@@ -110,6 +112,16 @@ Item {
         id: dashboard
 
         visibilities: root.visibilities
+
+        anchors.horizontalCenter: parent.horizontalCenter
+        anchors.top: parent.top
+    }
+
+    Dashboard.TriggerTab {
+        id: triggerTab
+
+        dashboardOffsetScale: dashboard.offsetScale
+        fullscreen: root.fullscreen
 
         anchors.horizontalCenter: parent.horizontalCenter
         anchors.top: parent.top

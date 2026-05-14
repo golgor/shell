@@ -138,4 +138,8 @@ QString CUtils::toLocalFile(const QUrl& url) const {
     return url.toLocalFile();
 }
 
+int CUtils::isoWeekNumber(const QDateTime& date) {
+    return date.date().weekNumber();
+}
+
 } // namespace caelestia

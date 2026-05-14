@@ -87,7 +87,13 @@ Singleton {
     }
 
     function reloadDynamicConfs(): void {
-        extras.batchMessage(["keyword bindlni ,Caps_Lock,global,caelestia:refreshDevices", "keyword bindlni ,Num_Lock,global,caelestia:refreshDevices"]);
+        extras.batchMessage([
+            "keyword bindlni ,Caps_Lock,global,caelestia:refreshDevices",
+            "keyword bindlni ,Num_Lock,global,caelestia:refreshDevices",
+            // Also trigger on Shift release for shift:both_capslock remapping
+            "keyword bindlrni ,Shift_L,global,caelestia:refreshDevices",
+            "keyword bindlrni ,Shift_R,global,caelestia:refreshDevices"
+        ]);
     }
 
     Component.onCompleted: reloadDynamicConfs()

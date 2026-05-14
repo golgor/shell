@@ -165,6 +165,13 @@ StyledWindow {
         }
 
         PanelBg {
+            id: triggerTabBg
+
+            panel: panels.triggerTab
+            deformAmount: 0.1
+        }
+
+        PanelBg {
             id: launcherBg
 
             panel: panels.launcher
@@ -257,12 +264,16 @@ StyledWindow {
             visibilities: visibilities
             bar: bar
             borderThickness: root.borderThickness
+            fullscreen: root.hasFullscreen
 
             utilities.horizontalStretch: (sidebarBg.rawDeformMatrix.m11 - 1) / 2 + 1
             utilities.deformMatrix: utilsBg.rawDeformMatrix
 
             dashboard.transform: Matrix4x4 {
                 matrix: dashBg.deformMatrix
+            }
+            triggerTab.transform: Matrix4x4 {
+                matrix: triggerTabBg.deformMatrix
             }
             launcher.transform: Matrix4x4 {
                 matrix: launcherBg.deformMatrix

@@ -145,7 +145,6 @@ class BarConfig : public ConfigObject {
             vmap({ { u"id"_s, u"activeWindow"_s }, { u"enabled"_s, true } }),
             vmap({ { u"id"_s, u"spacer"_s }, { u"enabled"_s, true } }),
             vmap({ { u"id"_s, u"tray"_s }, { u"enabled"_s, true } }),
-            vmap({ { u"id"_s, u"clock"_s }, { u"enabled"_s, true } }),
             vmap({ { u"id"_s, u"statusIcons"_s }, { u"enabled"_s, true } }),
             vmap({ { u"id"_s, u"power"_s }, { u"enabled"_s, true } }),
         })

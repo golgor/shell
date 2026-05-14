@@ -28,6 +28,12 @@ Region {
     }
 
     R {
+        panel: root.panels.triggerTab
+        y: 0
+        height: panel.visible ? panel.height + root.borderThickness : 0
+    }
+
+    R {
         panel: root.panels.launcher
         y: root.win.height - height
         height: panel.height * (1 - root.panels.launcher.offsetScale) + root.borderThickness

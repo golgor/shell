@@ -93,7 +93,7 @@ origin    git@github.com:golgor/shell.git      ← PRs go here
 upstream  git@github.com:caelestia-dots/shell.git  ← NEVER open PRs here
 ```
 
-When creating a PR always pass `--repo golgor/shell` explicitly:
+When creating a PR, always pass `--repo golgor/shell` explicitly:
 
 ```bash
 gh pr create --repo golgor/shell --base main --head <branch> ...

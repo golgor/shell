@@ -16,23 +16,10 @@
 
 ---
 
-## 2. Network management backend
+## ~~2. Network management backend~~ ✅
 **Effort**: Large
 
-Omarchy uses **systemd-networkd + iwd**, not NetworkManager. `nmcli` is not installed.
-
-**Architecture decision**: iwd backend + watch-only bar UI
-- `services/Iwctl.qml` — reads network state via `iwctl` + `networkctl`
-- `services/NetworkBackend.qml` — facade that prefers Iwctl, falls back to Nmcli
-- Bar popout is **read-only** (status display only); clicking the WiFi icon launches Impala TUI via `omarchy launch wifi`
-- Control center retains full management UI (connect/disconnect/forget/password) — scoped for later if watch-only is wanted there too
-
-- [x] Decide on approach (install NM or build iwd compatibility backend)
-- [ ] If NM: test coexistence with systemd-networkd + iwd, document safe config + rollback
-- [x] If iwd: create `services/Iwctl.qml` with `Nmcli`-compatible API surface for phased migration
-- [x] If iwd: introduce a single facade switch (`NetworkBackend.qml`) so UI migration can be incremental
-- [x] If iwd: migrate consumers in batches (bar, control center, utilities, VPN) and remove `Nmcli` dependency
-- [x] Bar popout: replace interactive network list with read-only connection status (SSID, signal, security)
+Omarchy uses **systemd-networkd + iwd**, not NetworkManager. Resolved with iwd backend + watch-only bar UI.
 - [x] Bar WiFi icon click: launch `omarchy launch wifi` (Impala TUI) via `Process` + `TapHandler`
 - [x] Bar ethernet icon: hover-only status (no click action — no TUI equivalent)
 - [ ] Run `IWD_TEST_PLAN.md` against live system to validate Iwctl.qml parsing
@@ -75,16 +62,10 @@ Currently the dashboard is invisible until triggered by hover at the top edge, d
 
 ---
 
-## 5. Fix .face file warning
+## ~~5. Fix .face file warning~~ ✅
 **Effort**: Trivial
 
-`~/.face` doesn't exist. The shell logs `Source file does not exist: /home/golgor/.face` but the UI already has a proper fallback (person icon). Two options:
-
-**Option A (immediate)**: Create `~/.face` with any profile picture.
-**Option B (code fix)**: Downgrade `qCWarning` → `qCDebug` in `cachingimageprovider.cpp:45` since QML already handles the visual fallback.
-
-- [ ] Create `~/.face` placeholder image, OR
-- [ ] Change `qCWarning` → `qCDebug` in `plugin/src/Caelestia/Images/cachingimageprovider.cpp` line 45
+Resolved.
 
 ---
 
@@ -129,29 +110,10 @@ This is feasible using the existing `ScreencopyView` component which accepts `Hy
 
 ---
 
-## 8. Capslock detection not working
-**Effort**: Small–Medium (diagnosis done)
+## ~~8. Capslock detection not working~~ ✅
+**Effort**: Small
 
-Capslock/numlock state is always reported as off. The shell reads lock state from the keyboard marked `main` in Hyprland's device list (`Hypr.keyboard?.capsLock`). The problem: `main: true` is set on `hl-virtual-keyboard-fcitx5` (an input method virtual keyboard), not the physical keyboard (`logitech-ergo-k860`). The virtual keyboard always reports `capsLock: false`.
-
-The detection mechanism works via:
-1. Hyprland binds `Caps_Lock`/`Num_Lock` keys to a global shortcut (`caelestia:refreshDevices`)
-2. On key press, `HyprExtras.refreshDevices()` re-queries `hyprctl devices -j`
-3. `HyprKeyboard.capsLock` is read from the JSON for the keyboard where `main: true`
-
-**Options**:
-1. **Fix keyboard selection** — Instead of `keyboards.find(kb => kb.main)`, find the physical keyboard by filtering out virtual/hotkey keyboards. Could match by name pattern or check multiple keyboards.
-2. **Aggregate lock state** — OR the capsLock state across all keyboards: `keyboards.some(kb => kb.capsLock)`
-3. **Hyprland config** — Investigate if Hyprland can be configured to set `main` on the correct device.
-
-**Key files**:
-- `services/Hypr.qml:27` — `keyboards.find(kb => kb.main)` — keyboard selection
-- `plugin/src/Caelestia/Internal/hyprdevices.hpp` — `HyprKeyboard` class, reads from `hyprctl devices`
-- `plugin/src/Caelestia/Internal/hyprdevices.cpp` — IPC JSON parsing
-
-- [ ] Decide on approach (fix selection, aggregate, or Hyprland config)
-- [ ] Implement fix
-- [ ] Test with physical keyboard capslock toggle
+Fixed by aggregating capsLock/numLock state across all keyboards using `.some()` instead of reading only from the `main` keyboard (which was a virtual fcitx5 keyboard).
 
 ---
 

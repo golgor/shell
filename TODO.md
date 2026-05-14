@@ -17,21 +17,26 @@
 ---
 
 ## 2. Network management backend
-**Effort**: Large (decision required first)
+**Effort**: Large
 
-Omarchy uses **systemd-networkd + iwd**, not NetworkManager. `nmcli` is not installed and the entire network UI is non-functional (WiFi scanning, connecting, status icons, VPN monitoring).
+Omarchy uses **systemd-networkd + iwd**, not NetworkManager. `nmcli` is not installed.
 
-**Options**:
-1. **Install NetworkManager** — Risky. Would conflict with systemd-networkd unless carefully configured (NM must use iwd backend, systemd-networkd must be disabled or scoped). High risk of breaking existing connectivity.
-2. **Rewrite backend for iwd/iwctl** — Large effort. `Nmcli.qml` is 1371 lines, 15 UI files reference it directly. Would need a new `Iwd.qml` service + updates to `Network.qml` facade + all UI files.
-3. **Disable network UI** — Simplest. Hide network-related UI elements via config and accept that network management happens outside the shell.
+**Architecture decision**: iwd backend + watch-only bar UI
+- `services/Iwctl.qml` — reads network state via `iwctl` + `networkctl`
+- `services/NetworkBackend.qml` — facade that prefers Iwctl, falls back to Nmcli
+- Bar popout is **read-only** (status display only); clicking the WiFi icon launches Impala TUI via `omarchy launch wifi`
+- Control center retains full management UI (connect/disconnect/forget/password) — scoped for later if watch-only is wanted there too
 
-**Decision**: TBD
-
-- [ ] Decide on approach (install NM, rewrite for iwd, or disable)
-- [ ] If NM: test coexistence with systemd-networkd + iwd, document safe config
-- [ ] If iwd: create `Iwd.qml` service, update `Network.qml` facade, update 15 UI files
-- [ ] If disable: set config to hide network UI elements
+- [x] Decide on approach (install NM or build iwd compatibility backend)
+- [ ] If NM: test coexistence with systemd-networkd + iwd, document safe config + rollback
+- [x] If iwd: create `services/Iwctl.qml` with `Nmcli`-compatible API surface for phased migration
+- [x] If iwd: introduce a single facade switch (`NetworkBackend.qml`) so UI migration can be incremental
+- [x] If iwd: migrate consumers in batches (bar, control center, utilities, VPN) and remove `Nmcli` dependency
+- [x] Bar popout: replace interactive network list with read-only connection status (SSID, signal, security)
+- [x] Bar WiFi icon click: launch `omarchy launch wifi` (Impala TUI) via `Process` + `TapHandler`
+- [x] Bar ethernet icon: hover-only status (no click action — no TUI equivalent)
+- [ ] Run `IWD_TEST_PLAN.md` against live system to validate Iwctl.qml parsing
+- [ ] Consider making control center network pane watch-only too (scoped out for now)
 
 ---
 
@@ -53,11 +58,7 @@ Omarchy theme change → theme-set hook → ThemeGenerator.sh
   → Colours.qml FileView auto-reloads
 ```
 
-- [ ] Create `scripts/omarchy-theme-sync.sh` that reads `colors.toml` and writes `scheme.json`
-- [ ] Solve M3 palette generation (either npm `material-color-utilities`, Python lib, or heuristic mapping)
-- [ ] Update `~/.config/omarchy/hooks/theme-set` to call the new script
-- [ ] Create `~/.local/state/caelestia/` directory and generate initial `scheme.json`
-- [ ] Test theme switching with `omarchy theme set <name>`
+- [ ] Design and implement (run grill-me-with-docs to refine)
 
 ---
 
@@ -70,11 +71,7 @@ Omarchy theme change → theme-set hook → ThemeGenerator.sh
 Currently the dashboard is invisible until triggered by hover at the top edge, drag, or keyboard shortcut. Adding a visible tab/handle at the top center showing date/time would provide a persistent affordance and orientation info.
 
 - [x] Verify 24h format — fixed via config
-- [ ] Create `DashboardTab.qml` — small visible handle at top-center showing date/time
-- [ ] Modify `modules/dashboard/Wrapper.qml` — render tab outside the `offsetScale`-gated visibility
-- [ ] Update `modules/drawers/Regions.qml` — ensure tab is in the Wayland input region
-- [ ] Add click-to-toggle interaction on the tab
-- [ ] Add `Config.dashboard.showTriggerTab` config property in `plugin/src/Caelestia/Config/dashboardconfig.hpp`
+- [ ] Design and implement (run grill-me-with-docs to refine)
 
 ---
 
@@ -103,10 +100,7 @@ The custom picker is used in one place: the dashboard face/profile picture picke
 2. **D-Bus portal call** — Call `org.freedesktop.portal.FileChooser.OpenFile()` directly. More work but pure QML/JS.
 3. **Shell out** — `zenity --file-selection` or similar. Hacky but quick.
 
-- [ ] Decide on approach
-- [ ] Implement portal-based file picker
-- [ ] Replace `components/filedialog/` usage in `User.qml` (and any other consumers)
-- [ ] Consider keeping custom picker as fallback if portal is unavailable
+- [ ] Design and implement (run grill-me-with-docs to refine)
 
 ---
 
@@ -131,8 +125,48 @@ This is feasible using the existing `ScreencopyView` component which accepts `Hy
 - `modules/bar/popouts/Content.qml` — popout registry (add new popout here)
 - `modules/bar/popouts/PopoutState.qml` — popout state machine
 
-- [ ] Create `modules/bar/popouts/WorkspacePreview.qml` with grid of ScreencopyView thumbnails
-- [ ] Register it in `modules/bar/popouts/Content.qml` as a Popout
-- [ ] Wire workspace hover in `modules/bar/components/workspaces/Workspace.qml` to trigger the popout
-- [ ] Add performance safeguards (thumbnail limit, lazy loading, live vs static capture)
-- [ ] Consider disabling or making the active window popout configurable
+- [ ] Design and implement (run grill-me-with-docs to refine)
+
+---
+
+## 8. Capslock detection not working
+**Effort**: Small–Medium (diagnosis done)
+
+Capslock/numlock state is always reported as off. The shell reads lock state from the keyboard marked `main` in Hyprland's device list (`Hypr.keyboard?.capsLock`). The problem: `main: true` is set on `hl-virtual-keyboard-fcitx5` (an input method virtual keyboard), not the physical keyboard (`logitech-ergo-k860`). The virtual keyboard always reports `capsLock: false`.
+
+The detection mechanism works via:
+1. Hyprland binds `Caps_Lock`/`Num_Lock` keys to a global shortcut (`caelestia:refreshDevices`)
+2. On key press, `HyprExtras.refreshDevices()` re-queries `hyprctl devices -j`
+3. `HyprKeyboard.capsLock` is read from the JSON for the keyboard where `main: true`
+
+**Options**:
+1. **Fix keyboard selection** — Instead of `keyboards.find(kb => kb.main)`, find the physical keyboard by filtering out virtual/hotkey keyboards. Could match by name pattern or check multiple keyboards.
+2. **Aggregate lock state** — OR the capsLock state across all keyboards: `keyboards.some(kb => kb.capsLock)`
+3. **Hyprland config** — Investigate if Hyprland can be configured to set `main` on the correct device.
+
+**Key files**:
+- `services/Hypr.qml:27` — `keyboards.find(kb => kb.main)` — keyboard selection
+- `plugin/src/Caelestia/Internal/hyprdevices.hpp` — `HyprKeyboard` class, reads from `hyprctl devices`
+- `plugin/src/Caelestia/Internal/hyprdevices.cpp` — IPC JSON parsing
+
+- [ ] Decide on approach (fix selection, aggregate, or Hyprland config)
+- [ ] Implement fix
+- [ ] Test with physical keyboard capslock toggle
+
+---
+
+## 9. Kubernetes context/namespace indicator
+**Effort**: TBD
+
+Add a widget or status indicator that shows the current `kubectx` (Kubernetes context) and `kubens` (Kubernetes namespace). This is critical for avoiding accidental operations against the wrong cluster/namespace.
+
+- [ ] Design and implement (run grill-me-with-docs to refine)
+
+---
+
+## 10. Cloud SQL Proxy status indicator
+**Effort**: TBD
+
+Add a widget or status indicator that tracks whether `cloud-sql-proxy` is running and which instances it's connected to.
+
+- [ ] Design and implement (run grill-me-with-docs to refine)
